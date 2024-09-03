@@ -1,0 +1,934 @@
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       1
+
+                   ***********************************************
+                   *   PROYECTO 2: SERPIENTES Y ESCALERAS        *
+                   *   AGUILAR MAYA DANIEL                       *
+                   *   ESTRUCTURA Y PROGRAMACIN DE COMPUTADORAS *
+                   ***********************************************
+
+
+                   ***********************************************
+                   *           DATOS PARA LOS 2 JUGADORES        *
+                   ***********************************************
+
+                           ORG $0000           ;direccin de inicio de variables
+.                  para el jugador 1 en decimal
+                   VAR1_1 EQU $0000              ;direccin primer decimal del
+.                  jugador 1
+                   VAR1_2 EQU $0001                ;direccin segundo decimal del
+.                  jugador 1
+                           ORG $0002           ;direccin donde se guardar la
+.                  frase :Jugador 1___
+  0002 3A 4A 75 67 jugador1 FCB ':','J','u','g','a','d','o','r',' ','1','_','_',
+. 0006 61 64 6F 72 '_',0   ; Carcter nulo que indica el final de la cadena
+. 000A 20 34 5F 5F
+. 000E 5F 00
+                   POSICIONJ1 EQU $000F          ;posicion real del jugador 1
+.                  (hexadecimal)
+
+
+
+                           ORG $0010               ;direccin de inicio de
+.                  variables para el jugador 2 en decimal
+                   VAR2_1 EQU $0010                ;direccin primer decimal del
+.                  jugador 2
+                   VAR2_2 EQU $0011                ;direccin segundo decimal del
+.                  jugador 2
+                           ORG $0012               ;direccin donde se guardar la
+.                  frase :Jugador 2___
+  0012 3A 4A 75 67 jugador2 FCB ':','J','u','g','a','d','o','r',' ','2','_','_',
+. 0016 61 64 6F 72 '_',0   ; Carcter nulo que indica el final de la cadena
+. 001A 20 32 5F 5F
+. 001E 5F 00
+                   POSICIONJ2 EQU $001F    ;posicion real del jugador 1
+.                  (hexadecimal)
+
+
+                   ***********************************************
+                   *            DATOS DE LOS DOS DADOS           *
+                   ***********************************************
+
+                           ORG $0020           ;DADO 1
+                   D1   EQU $0020          ;Direccion para guardar dado 1 en
+.                  decimal en ASCII
+                           ORG $0021
+  0021 3A 44 41 44 palabraDado1 FCB ':','D','A','D','O',' ','1','_','_','_','_',
+. 0025 4F 20 31 5F '_','_','_',0
+. 0029 5F 5F 5F 5F
+. 002D 5F 5F 00
+                   DADO1   EQU $002F       ;Direccion para guardar el dado 1
+.                  (hexadecimal)
+
+                           ORG $0030           ;DADO 2
+                   D2      EQU $0030               ;Direccion para guardar dado
+.                  2 en decimal
+                           ORG $0031
+  0031 3A 44 41 44 palabraDado2 FCB ':','D','A','D','O',' ','2','_','_','_','_',
+. 0035 4F 20 32 5F '_','_','_',0
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       2
+
+. 0039 5F 5F 5F 5F
+. 003D 5F 5F 00
+                   DADO2 EQU $003F ;Direccion para guardar el dado 2
+.                  (hexadecimal)
+
+                           ORG $0040           ;TIRADA
+                   T1   EQU $0040          ;Direccion para guardar 1er dato
+.                  decimal de la tirada
+                   T2   EQU $0041                ;Direccion para guardar 2do
+.                  dato decimal de la tirada
+                           ORG $0042
+  0042 3A 54 49 52 palabraTirada FCB ':','T','I','R','A','D','A','_','_','_','_
+. 0046 41 44 41 5F ','_','_',0
+. 004A 5F 5F 5F 5F
+. 004E 5F 00
+                   TIRADA EQU $004F              ;Tirada real de los dados
+.                  (hexadecimal)
+
+
+                   ***********************************************
+                   *            CONSTANTES PUERTO SERIAL         *
+                   ***********************************************
+                   *DECLARACION CONSTANTES
+
+                   SCDR   EQU   $102F
+                   SCCR2  EQU   $102D
+                   SCSR   EQU   $102E
+                   SCCR1  EQU   $102C
+                   BAUD   EQU   $102B
+                   HPRIO  EQU   $103C
+                   SPCR   EQU   $1028
+                   CSCTL  EQU   $105D
+                   OPT2   EQU   $1038
+                   DDRD   EQU   $1009
+
+                   *DECLARACION DE VARIABLES
+                   *PARA DADOS
+                   ORDEN EQU $0070
+                   U1    EQU $0071
+                   U2    EQU $0072
+                   U3    EQU $0073
+                   U4    EQU $0074
+                   U5      EQU $0075
+
+                   ALEATORIO EQU $0078
+                   AUX1 EQU $0080
+                   AUX2 EQU $0081
+
+                   ***********************************************
+                   *   VARIABLES BCD: Conversin a decimal       *
+                   ***********************************************
+                   V1      EQU $0082
+                   V2      EQU $0083
+                   V3      EQU $0084
+                   V4      EQU $0085
+                   V5      EQU $0086
+                   W1      EQU $0087
+                   W2      EQU $0088
+                   W3      EQU $0089
+                   W4      EQU $008A
+                   W5      EQU $008B
+
+                   ******************************************************
+                   *      VARIABLE DONDE SE GUARDARN LAS DIRECCIONES   *
+                   *        DE MEMORIA DE LA POSICIN DEL JUGADOR 1 Y 2 *
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       3
+
+                   *                   (AUXILIARES)                     *
+                   ******************************************************
+                   AUXJ EQU $0090
+                   AUXJD1 EQU $0092
+                   AUXJD2 EQU $0094
+                   TEMP EQU $0096
+
+                   ***********************************************
+                   *                  MENSAJE                    *
+                   *        EMPEZAR EN LA LOCALIDAD 0050        *
+                   ***********************************************
+
+
+
+                   *************************************************************
+.                  ********************
+                   ***************                                             *
+.                  ********************
+                   ***************            INICIO DEL PROGRAMA              *
+.                  ********************
+                   ***************                                             *
+.                  ********************
+                   *************************************************************
+.                  ********************
+
+
+                           ORG $8000
+                   INICIO:
+                           ;Puerto serial
+  8000 8E 00 FF            LDS #$00FF
+  8003 BD 82 8C            JSR SERIAL
+                           ;Limpieza de datos para empezar el programa
+  8006 BD 81 D4            JSR LIMPIAR_DATOS
+
+
+                   JUEGO:
+                           ;Cargamos la direccin de memoria del jugador 1: $000F
+  8009 CE 00 0F            LDX #POSICIONJ1
+  800C DF 90               STX AUXJ
+
+  800E CE 00 00            LDX #VAR1_1
+  8011 DF 92               STX AUXJD1
+  8013 CE 00 01            LDX #VAR1_2
+  8016 DF 94               STX AUXJD2
+
+  8018 BD 80 2F            JSR TURNO ;Acciones del turno del jugador 1:
+                                     ;Tirar dados
+                                     ;/ Moverse
+                                     ;/ Verificar si excede en 100
+                                     ;/Verificar serpiente\escalera
+                                     ;/ verificar si gan
+
+
+  801B CE 00 1F            LDX #POSICIONJ2
+  801E DF 90               STX AUXJ
+
+  8020 CE 00 10            LDX #VAR2_1
+  8023 DF 92               STX AUXJD1
+  8025 CE 00 11            LDX #VAR2_2
+  8028 DF 94               STX AUXJD2
+
+  802A BD 80 2F            JSR TURNO
+
+  802D 20 DA               BRA JUEGO ;Si al acabar el turno del jugador 1 y 2 no
+.                  ha ganado nadie
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       4
+
+                                     ;Se reinicia el proceso de juego
+
+                   ***********************************************
+                   *                                             *
+                   *    PROCEDIMIENTO PARA EL TURNO DE JUEGO     *
+                   *    INVOLUCRA  LA LLAMADA A LANZAR_DADO,     *
+                   *    MODER_JUGADOR,                           *
+                   *     -------------                           *
+                   *                                             *
+                   ***********************************************
+
+                   TURNO:
+                           ;Se lanzan los dados
+  802F BD 80 E5            JSR LANZAR_DADO
+
+                           ;Al mover al jugador, ya sea que exceda o no exceda
+.                  100, el valor ya est en el registro A
+  8032 BD 80 50            JSR MOVER_JUGADOR
+
+                           ;Se manda a llamar al procedimiento que se encargar
+.                  de comparar la posicin con alguna escalera o serpiente
+                           ;para hacer el respectivo cambio de posicin
+  8035 BD 80 66            JSR VERIFICAR_SALTO
+
+  8038 A7 00               STAA 0,X
+
+                           ;Guarda la posicin final en la variable temporal para
+.                  la ltima parte de verificar si hay ganador
+                           ;STAA TEMP
+
+                           ;Pone en ascii lo que hay en A. Con lo siguiente se
+.                  tiene en el registro D el valor de la posicin (16 bits)
+                           ;Para poder usar el procedimiento
+  803A 16                  TAB
+  803B 86 00               LDAA #$00
+
+  803D BD 81 7F            JSR BINBCD
+
+                           ;X ya tiene la direccin de las decenas: 0000 (jugador
+.                  1) o bien 0010 (jugador 2)
+  8040 DE 92               LDX AUXJD1
+  8042 96 85               LDAA V4 ;carga el valor de las decenas
+  8044 A7 00               STAA 0,X
+
+                           ;X ya tiene la direccin 0001 (jugador 1) o bien 0011
+.                  (jugador 2)
+  8046 DE 94               LDX AUXJD2
+  8048 96 86               LDAA V5 ;carga el valor de las unidades
+  804A A7 00               STAA 0,X
+
+  804C BD 82 15            JSR MOSTRAR_MENSAJE
+
+  804F 39                  RTS
+
+                   ***********************************************
+                   *    PROCEDIMIENTO QUE SOLAMENTE SUMA A LA    *
+                   *    POSICIN DEL JUGADOR LO QUE SE OBTUVO    *
+                   *     EN LA TIRADA Y VERIFICA SI SE EXCEDE    *
+                   *     MS DE 100 PARA HACER EL RETROCESO      *
+                   ***********************************************
+                   MOVER_JUGADOR:
+                           ;Direccin de memoria del jugador en cuestin en el reg
+.                  X
+  8050 DE 90               LDX AUXJ
+
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       5
+
+                           ;Contenido (posicin) del jugador en cuestin en el
+.                  registro A
+  8052 A6 00               LDAA 0,X
+
+                           ;A lo que tenga se suma la tirada
+  8054 9B 4F               ADDA TIRADA
+
+                           ;Si excede en 100 entonces se resta a 100 el
+.                  excedente y se guarda en A
+                           ;En caso de no exceder, A se mantiene
+  8056 BD 80 5A            JSR VERIFICAR_MAS100
+
+  8059 39                  RTS
+                   ************************************************
+                   *  PROCEDIMIENTO PARA VERIFICAR SI LA POSICIN *
+                   *  ES MAYOR A 100. EN CASO DE SER VERDADERO    *
+                   *   RESTAR LOS VALORES DE EXCEDENTE            *
+                   ************************************************
+                   VERIFICAR_MAS100:
+  805A 81 64               CMPA #100
+
+  805C 2F 07               BLE FIN_V100    ;Si el valor de A es menor o igual a
+.                  100 no hacer nada (salto a FIN_V100)
+
+  805E C6 64               LDAB #100
+  8060 10                  SBA ;En A ahora se tiene el excedente (Si es 105
+.                  entonces en A ya se tiene 5)
+
+  8061 16                  TAB ;Ahora en B est el excedente
+  8062 86 64               LDAA #100
+
+  8064 10                  SBA ;Se resta lo que tiene A (100) de B (el
+.                  excedente, 5 en este caso) para as tener 95 en A
+
+
+                   FIN_V100:
+  8065 39                  RTS
+
+                   ************************************************
+                   *    PROCEDIMIENTO PARA VERIFICAR ESCALERAS    *
+                   *                 Y SERPIENTES                 *
+                   ************************************************
+                   VERIFICAR_SALTO:
+
+                   ESCALERA_1:
+  8066 81 04               CMPA #4
+  8068 26 04               BNE ESCALERA_2 ;Si la posicin no coincide con 4,
+.                  salta a otra escalera
+  806A 8B 15               ADDA  #21
+  806C 20 76               BRA FIN_SALTO
+
+                   ESCALERA_2:
+  806E 81 0D               CMPA #13
+  8070 26 04               BNE ESCALERA_3
+  8072 8B 21               ADDA #33
+  8074 20 6E               BRA FIN_SALTO
+
+                   ESCALERA_3:
+  8076 81 21               CMPA #33
+  8078 26 04               BNE ESCALERA_4
+  807A 8B 10               ADDA #16
+  807C 20 66               BRA FIN_SALTO
+
+                   ESCALERA_4:
+  807E 81 2A               CMPA #42
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       6
+
+  8080 26 04               BNE ESCALERA_5
+  8082 8B 15               ADDA #21
+  8084 20 5E               BRA FIN_SALTO
+
+                   ESCALERA_5:
+  8086 81 32               CMPA #50
+  8088 26 04               BNE ESCALERA_6
+  808A 8B 1D               ADDA #29
+  808C 20 56               BRA FIN_SALTO
+
+                   ESCALERA_6:
+  808E 81 3E               CMPA #62
+  8090 26 04               BNE ESCALERA_7
+  8092 8B 13               ADDA #19
+  8094 20 4E               BRA FIN_SALTO
+
+                   ESCALERA_7:
+  8096 81 4A               CMPA #74
+  8098 26 04               BNE SERPIENTE_1
+  809A 8B 12               ADDA #18
+  809C 20 46               BRA FIN_SALTO
+
+                   SERPIENTE_1:
+  809E 81 1B               CMPA #27
+  80A0 26 05               BNE SERPIENTE_2
+  80A2 C6 16               LDAB #22
+  80A4 10                  SBA
+  80A5 20 3D               BRA FIN_SALTO
+
+                   SERPIENTE_2:
+  80A7 81 28               CMPA #40
+  80A9 26 05               BNE SERPIENTE_3
+  80AB C6 25               LDAB #37
+  80AD 10                  SBA
+  80AE 20 34               BRA FIN_SALTO
+
+                   SERPIENTE_3:
+  80B0 81 2B               CMPA #43
+  80B2 26 05               BNE SERPIENTE_4
+  80B4 C6 19               LDAB #25
+  80B6 10                  SBA
+  80B7 20 2B               BRA FIN_SALTO
+
+                   SERPIENTE_4:
+  80B9 81 36               CMPA #54
+  80BB 26 05               BNE SERPIENTE_5
+  80BD C6 17               LDAB #23
+  80BF 10                  SBA
+  80C0 20 22               BRA FIN_SALTO
+
+                   SERPIENTE_5:
+  80C2 81 42               CMPA #66
+  80C4 26 05               BNE SERPIENTE_6
+  80C6 C6 15               LDAB #21
+  80C8 10                  SBA
+  80C9 20 19               BRA FIN_SALTO
+
+                   SERPIENTE_6:
+  80CB 81 4C               CMPA #76
+  80CD 26 05               BNE SERPIENTE_7
+  80CF C6 12               LDAB #18
+  80D1 10                  SBA
+  80D2 20 10               BRA FIN_SALTO
+
+                   SERPIENTE_7:
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       7
+
+  80D4 81 59               CMPA #89
+  80D6 26 05               BNE SERPIENTE_8
+  80D8 C6 24               LDAB #36
+  80DA 10                  SBA
+  80DB 20 07               BRA FIN_SALTO
+
+                   SERPIENTE_8:
+  80DD 81 63               CMPA #99
+  80DF 26 03               BNE FIN_SALTO
+  80E1 C6 3A               LDAB #58
+  80E3 10                  SBA
+
+                   FIN_SALTO:
+
+  80E4 39                  RTS
+
+
+                   ************************************************
+                   *     PROCEDIMIENTO DE LANZAR_DADO, INVOLUCRA  *
+                   *       TENER VALORES PARA LOS DOS DADOS Y LA    *
+                   *       SUMA DE ELLOS EN 'TIRADA'. Para generar  *
+                   *       los valores se manda a llamar a          *
+                   *       GENERAR_ALEATORIO (AUX1,AUX2)            *
+                   ************************************************
+
+                   LANZAR_DADO:
+                           ;El nmero aleatorio est en el registro Y
+  80E5 BD 81 27            JSR GENERAR_ALEATORIO
+
+                           ;Cambiamos el registro Y al registro D (conformado
+.                  por A y B)
+  80E8 18 8F               XGDY
+                           ;Un byte (para el primer dado) se guarda en AUX1
+  80EA 97 80               STAA AUX1
+
+                           ;Un byte (para el segundo dado) se guarda en AUX2
+  80EC D7 81               STAB AUX2
+
+                           ;___________________________________DADO_1
+                           ;Primer byte del nmero aleatorio a su conversin en un
+.                  dado
+                           ;Se pasa ese byte en todo el registro D y se divide
+.                  por el registro
+                           ;X con el valor de $0006. Se hace lo propio con el
+.                  segundo byte
+  80EE 86 00               LDAA #$00
+  80F0 D6 80               LDAB AUX1
+
+  80F2 CE 00 06            LDX #$0006
+
+  80F5 02                  IDIV
+                           ;El residuo se guarda en el registro D, pero como se
+.                  guardar un residuo
+                           ;entre 0 y 5, dicho resultado estar en  el registro B
+  80F6 5C                  INCB ;Valor entre 1 y 6
+
+  80F7 D7 2F               STAB DADO1
+                           ;___________________________________DADO_2
+  80F9 86 00               LDAA #$00
+  80FB D6 81               LDAB AUX2
+
+  80FD CE 00 06            LDX #$0006
+
+  8100 02                  IDIV
+
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       8
+
+  8101 5C                  INCB
+
+  8102 D7 3F               STAB DADO2
+                           ;___________________________________TIRADA
+  8104 96 2F               LDAA DADO1
+  8106 D6 3F               LDAB DADO2
+
+                           ;Suma los dados 1 y 2
+  8108 1B                  ABA
+  8109 97 4F               STAA TIRADA
+                           ;__________________MOSTRAR DADOS EN ASCII
+  810B 96 2F               LDAA DADO1
+  810D 8B 30               ADDA #48
+  810F 97 20               STAA D1
+
+  8111 96 3F               LDAA DADO2
+  8113 8B 30               ADDA #48
+  8115 97 30               STAA D2
+
+                           ;__________________MOSTRAR TIRADA EN ASCII
+  8117 86 00               LDAA #$00
+  8119 D6 4F               LDAB TIRADA
+
+  811B BD 81 7F            JSR BINBCD
+
+  811E 96 85               LDAA V4
+  8120 97 40               STAA T1
+
+  8122 96 86               LDAA V5
+  8124 97 41               STAA T2
+
+  8126 39                  RTS
+
+                   *************************************************
+                   *  PROCEDIMIENTO PARA GENERAR UN NMERO         *
+                   *  ALEATORIO EN LA LOCALIDAD LDY Y ASIGNARLA    *
+                   *  EN LA VARIABLE ALEATORIO (LUEGO EN AUX1,AUX2)*
+                   *************************************************
+
+                   GENERAR_ALEATORIO:
+                   AGAIN
+  8127 18 CE 00 00         LDY #$0000
+
+                   CICLATED
+  812B 86 3F             LDAA #'?
+  812D 97 70             STAA ORDEN
+                   CICLOD
+  812F 18 08               INY
+  8131 96 70             LDAA ORDEN
+  8133 81 3F             CMPA #'?
+  8135 27 F8             BEQ  CICLOD
+
+  8137 D6 71             LDAB U1
+  8139 26 15             BNE  SIGUEAD
+                   BORRAD
+  813B 7F 00 71          CLR U1
+  813E 7F 00 72          CLR U2
+  8141 7F 00 73          CLR U3
+  8144 7F 00 74          CLR U4
+
+  8147 81 44             CMPA #'D
+  8149 26 E0             BNE CICLATED
+  814B 97 71             STAA U1     * VALIDA D
+  814D 7E 81 2B          JMP CICLATED
+
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE       9
+
+                   SIGUEAD
+  8150 D6 72             LDAB U2
+  8152 26 09             BNE  SIGUED
+  8154 81 41             CMPA #'A
+  8156 26 E3             BNE BORRAD
+  8158 97 72             STAA U2     * VALIDA A
+  815A 7E 81 2B          JMP CICLATED
+
+                   SIGUED
+  815D D6 73             LDAB U3
+  815F 26 09             BNE  SIGUEO
+  8161 81 44             CMPA #'D
+  8163 26 D6             BNE BORRAD
+  8165 97 73             STAA U3     * VALIDA D
+  8167 7E 81 2B          JMP CICLATED
+
+                   SIGUEO
+  816A D6 74             LDAB U4
+  816C 26 09             BNE  SIGUEFS
+  816E 81 4F             CMPA #'O
+  8170 26 C9             BNE BORRAD
+  8172 97 74             STAA U4     * VALIDA 0
+  8174 7E 81 2B          JMP CICLATED
+                   SIGUEFS
+  8177 81 53               CMPA #'S
+  8179 26 C0             BNE BORRAD
+                   TIRADAA
+                           *se toma el numero aleatorio
+  817B 18 DF 78            STY ALEATORIO
+
+  817E 39                  RTS
+
+                   ***********************************************
+                   *                                                          *
+                   *       PROCEDIMIENTO PARA CONVERTIR UN NMERO  *
+                   *            EN HEXADECIMAL A DECIMAL EN        *
+                   *         LA VENTANA DUMP (ASCII ADECUADO)         *
+                   ***********************************************
+
+                   BINBCD
+  817F 7F 00 82          CLR V1
+  8182 7F 00 83          CLR V2
+  8185 7F 00 84          CLR V3
+  8188 7F 00 85          CLR V4
+  818B 7F 00 86          CLR V5
+
+  818E 7F 00 87          CLR W1
+  8191 7F 00 88          CLR W2
+  8194 7F 00 89          CLR W3
+  8197 7F 00 8A          CLR W4
+  819A 7F 00 8B          CLR W5
+
+  819D CE 27 10          LDX  #$2710
+  81A0 02                IDIV
+  81A1 8F                XGDX
+  81A2 D7 87             STAB W1
+  81A4 CB 30             ADDB #$30
+  81A6 D7 82             STAB V1
+  81A8 8F                XGDX
+  81A9 CE 03 E8          LDX  #$3E8
+  81AC 02                IDIV
+  81AD 8F                XGDX
+  81AE D7 88             STAB W2
+  81B0 CB 30             ADDB #$30
+  81B2 D7 83             STAB V2
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE      10
+
+  81B4 8F                XGDX
+  81B5 CE 00 64          LDX  #$64
+  81B8 02                IDIV
+  81B9 8F                XGDX
+  81BA D7 89             STAB W3
+  81BC CB 30             ADDB #$30
+  81BE D7 84             STAB V3
+  81C0 8F                XGDX
+  81C1 CE 00 0A          LDX  #$A
+  81C4 02                IDIV
+  81C5 8F                XGDX
+  81C6 D7 8A             STAB W4
+  81C8 CB 30             ADDB #$30
+  81CA D7 85             STAB V4
+  81CC 8F                XGDX
+  81CD D7 8B             STAB W5
+  81CF CB 30             ADDB #$30
+  81D1 D7 86             STAB V5
+
+
+  81D3 39                RTS
+
+
+                   ***********************************************
+                   *                                             *
+                   *         PROCEDIMIENTO PARA LIMPIAR DATOS    *
+                   *         EMPEZANDO EL JUEGO                  *
+                   *                                             *
+                   ***********************************************
+
+                   LIMPIAR_DATOS:
+                           ;INICIALIZACIN EN CERO DECIMAL LAS VARIABLES
+  81D4 86 30               LDAA #48        ;0 en ASCII
+  81D6 97 00               STAA VAR1_1
+  81D8 97 01           STAA VAR1_2
+  81DA 97 10           STAA VAR2_1
+  81DC 97 11           STAA VAR2_2
+  81DE 97 40           STAA T1
+  81E0 97 41           STAA T2
+  81E2 97 20           STAA D1
+  81E4 97 30           STAA D2
+
+                       ;INICIALIZANDO EN CERO REAL LAS VARIABLES
+  81E6 86 00           LDAA #00
+  81E8 97 0F           STAA POSICIONJ1
+  81EA 97 1F           STAA POSICIONJ2
+  81EC 97 2F           STAA DADO1
+  81EE 97 3F           STAA DADO2
+  81F0 97 4F           STAA TIRADA
+  81F2 97 52           STAA $52
+  81F4 97 53           STAA $53
+  81F6 97 54           STAA $54
+  81F8 97 55           STAA $55
+  81FA 97 56           STAA $56
+  81FC 97 57           STAA $57
+  81FE 97 58           STAA $58
+  8200 97 59           STAA $59
+  8202 97 5A           STAA $5A
+  8204 97 5B           STAA $5B
+  8206 97 5C           STAA $5C
+  8208 97 5D           STAA $5D
+  820A 97 5E           STAA $5E
+  820C 97 5F           STAA $5F
+
+  820E 86 58           LDAA #88
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE      11
+
+  8210 97 50           STAA $50
+  8212 97 51           STAA $51
+
+  8214 39              RTS
+
+                   ***********************************************
+                   *                                             *
+                   *         PROCEDIMIENTO PARA MOSTRAR          *
+                   *            MENSAJE DEL GANADOR              *
+                   *                                                         *
+                   *                                             *
+                   ***********************************************
+
+                   ;Este procedimiento verifica si hay ganador
+                   MOSTRAR_MENSAJE:
+
+                   ;Si el ganador es el jugador 1
+                   MSJ_JUGADOR1:
+                           ;Compara el valor 100 con el contenido del JUGADOR1
+  8215 86 64               LDAA #100
+  8217 91 0F               CMPA POSICIONJ1
+
+  8219 26 19               BNE MSJ_JUGADOR2
+
+  821B 86 4A               LDAA #'J'
+  821D 97 50               STAA $50
+  821F 86 31               LDAA #'1'
+  8221 97 51               STAA $51
+
+                           ;Si hay un ganador entonces las variables auxiliares
+.                  de BINBCD DEBEN TENER EL 100
+  8223 96 84               LDAA V3
+  8225 97 00               STAA VAR1_1
+  8227 96 83               LDAA V2
+  8229 97 01               STAA VAR1_2
+  822B CE 00 02            LDX #$0002
+  822E 96 82               LDAA V1
+  8230 A7 00               STAA 0,X
+
+  8232 20 1D               BRA MSJ
+
+                   ;Si el ganador es el jugador 2
+                   MSJ_JUGADOR2:
+                           ;Compara el valor 100 con el contenido del JUGADOR2
+  8234 86 64               LDAA #100
+  8236 91 1F               CMPA POSICIONJ2
+
+  8238 26 51               BNE FIN_MSJ
+  823A 86 4A               LDAA #'J'
+  823C 97 50               STAA $50
+  823E 86 32               LDAA #'2'
+  8240 97 51               STAA $51
+
+                           ;Si hay un ganador entonces las variables auxiliares
+.                  de BINBCD DEBEN TENER EL 100
+  8242 96 84               LDAA V3
+  8244 97 10               STAA VAR2_1
+  8246 96 83               LDAA V2
+  8248 97 11               STAA VAR2_2
+  824A CE 00 12            LDX #$0012
+  824D 96 82               LDAA V1
+  824F A7 00               STAA 0,X
+
+                   MSJ:
+
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE      12
+
+  8251 86 20               LDAA #' '
+  8253 97 52               STAA $52
+  8255 86 59               LDAA #'Y'
+  8257 97 53               STAA $53
+  8259 86 41               LDAA #'A'
+  825B 97 54               STAA $54
+  825D 86 20               LDAA #' '
+  825F 97 55               STAA $55
+  8261 86 47               LDAA #'G'
+  8263 97 56               STAA $56
+  8265 86 41               LDAA #'A'
+  8267 97 57               STAA $57
+  8269 86 4E               LDAA #'N'
+  826B 97 58               STAA $58
+  826D 86 41               LDAA #'A'
+  826F 97 59               STAA $59
+  8271 86 53               LDAA #'S'
+  8273 97 5A               STAA $005A
+  8275 86 54               LDAA #'T'
+  8277 97 5B               STAA $005B
+  8279 86 45               LDAA #'E'
+  827B 97 5C               STAA $005C
+  827D 86 21               LDAA #'!'
+  827F 97 5D               STAA $005D
+  8281 86 21               LDAA #'!'
+  8283 97 5E               STAA $005E
+  8285 86 21               LDAA #'!'
+  8287 97 5F               STAA $005F
+
+  8289 20 1D               BRA EXITO
+                   FIN_MSJ
+  828B 39                  RTS
+
+                   *************************************************************
+.                  ****************************
+                   *************************************************************
+.                  ****************************
+                   *       PUERTO SERIAL              **************************
+.                  ****************************
+                   *************************************************************
+.                  ****************************
+                   SERIAL
+
+  828C CC 30 2C           LDD   #$302C  * CONFIGURA PUERTO SERIAL
+  828F B7 10 2B           STAA  BAUD    * BAUD  9600  para cristal de 8MHz
+  8292 F7 10 2D           STAB  SCCR2   * HABILITA  RX Y TX PERO INTERRUPCN SOLO
+.                  RX
+  8295 86 00              LDAA  #$00
+  8297 B7 10 2C           STAA  SCCR1   * 8 BITS
+
+  829A 86 FE              LDAA  #$FE    * CONFIG PUERTO D COMO SALIDAS (EXCEPTO
+.                  PD0)
+  829C B7 10 09           STAA  DDRD    * SEA  ENABLE DEL DISPLAY  PD4  Y RS PD3
+
+
+  829F 86 04              LDAA  #$04
+  82A1 B7 10 3C           STAA  HPRIO
+
+  82A4 86 00              LDAA  #$00
+  82A6 06                 TAP
+  82A7 39                RTS
+                   EXITO:
+  82A8 20 06               BRA EXITO3
+
+                   ***********************************
+  ADDR B1 B2 B3 B4 C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE      13
+
+                   * ATENCION A INTERRUPCION SERIAL
+                   ***********************************
+                          ORG  $F100
+
+  F100 B6 10 2E           LDAA SCSR
+  F103 B6 10 2F           LDAA SCDR
+  F106 97 70              STAA ORDEN
+
+  F108 3B                 RTI
+
+
+                   ***********************************
+                   * VECTOR INTERRUPCION SERIAL
+                   ***********************************
+                          ORG   $FFD6
+  FFD6 F1 00              FCB   $F1,$00
+
+
+                   ***********************************
+                   *RESET
+                   ***********************************
+                          ORG    $FFFE
+  FFFE 80 00       RESET  FCB    $80,$00
+                   ***********************************
+                           ORG $82b0
+                   EXITO3:
+                          END   $8000
+
+  Symbol Table 
+
+  U2                 0072
+  U3                 0073
+  U4                 0074
+  U5                 0075
+  FIN_V100           8065
+  D1                 0020
+  D2                 0030
+  V1                 0082
+  V2                 0083
+  V3                 0084
+  V4                 0085
+  SIGUEAD            8150
+  V5                 0086
+  SERIAL             828C
+  BORRAD             813B
+  W1                 0087
+  W2                 0088
+  W3                 0089
+  AUXJD1             0092
+  W4                 008A
+  AUXJD2             0094
+  W5                 008B
+  VAR2_1             0010
+  TIRADAA            817B
+  AGAIN              8127
+  VAR2_2             0011
+  CSCTL              105D
+  MOVER_JUGADOR      8050
+  SCCR1              102C
+  SCCR2              102D
+  ALEATORIO          0078
+  JUGADOR1           0002
+  EXITO3             82B0
+  JUGADOR2           0012
+  TEMP               0096
+  Symbol Table     C:\Users\pelir\Downloads\EJERCICIOS\Nueva        PAGE      14
+
+  BAUD               102B
+  CICLATED           812B
+  SIGUEFS            8177
+  SERPIENTE_1        809E
+  SERPIENTE_2        80A7
+  SERPIENTE_3        80B0
+  SERPIENTE_4        80B9
+  ESCALERA_1         8066
+  SERPIENTE_5        80C2
+  ESCALERA_2         806E
+  SERPIENTE_6        80CB
+  ESCALERA_3         8076
+  SERPIENTE_7        80D4
+  ESCALERA_4         807E
+  SERPIENTE_8        80DD
+  ESCALERA_5         8086
+  CICLOD             812F
+  ESCALERA_6         808E
+  ESCALERA_7         8096
+  OPT2               1038
+  FIN_SALTO          80E4
+  AUX1               0080
+  AUX2               0081
+  POSICIONJ1         000F
+  POSICIONJ2         001F
+  MSJ                8251
+  AUXJ               0090
+  EXITO              82A8
+  BINBCD             817F
+  RESET              FFFE
+  FIN_MSJ            828B
+  ORDEN              0070
+  HPRIO              103C
+  LANZAR_DADO        80E5
+  LIMPIAR_DATOS      81D4
+  GENERAR_ALEATORIO  8127
+  SCSR               102E
+  MOSTRAR_MENSAJE    8215
+  SIGUED             815D
+  VERIFICAR_MAS100   805A
+  DDRD               1009
+  SIGUEO             816A
+  PALABRADADO1       0021
+  JUEGO              8009
+  PALABRADADO2       0031
+  PALABRATIRADA      0042
+  TIRADA             004F
+  VAR1_1             0000
+  VAR1_2             0001
+  SCDR               102F
+  VERIFICAR_SALTO    8066
+  MSJ_JUGADOR1       8215
+  MSJ_JUGADOR2       8234
+  DADO1              002F
+  DADO2              003F
+  SPCR               1028
+  T1                 0040
+  T2                 0041
+  TURNO              802F
+  INICIO             8000
+  U1                 0071
